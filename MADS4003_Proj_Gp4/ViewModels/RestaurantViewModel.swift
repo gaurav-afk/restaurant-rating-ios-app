@@ -13,6 +13,10 @@ class RestaurantViewModel: ObservableObject {
     private let API_KEY = ""
     @Published var restaurants : [Restaurant] = []
         
+    init(){
+        getRestaurants()
+    }
+    
     func getRestaurants(){
         let apiURL = "https://api.yelp.com/v3/businesses/search?term=restaurants&location=Toronto"
         let headers: HTTPHeaders = ["Authorization": "Bearer \(API_KEY)",
@@ -37,7 +41,7 @@ class RestaurantViewModel: ObservableObject {
                     print("4")
                     let cateogory: String = restaurantJSON["categories"].arrayValue.first!.dictionaryValue["title"]!.stringValue
                     
-                    print("json parsed \(id), \(name), \(location), \(iconUrl), \(cateogory)")
+                    print("json parsed \(id), \(name), \(location), \(String(describing: iconUrl)), \(cateogory)")
                     
                     return Restaurant(id: id,
                                       name: name,
@@ -51,19 +55,24 @@ class RestaurantViewModel: ObservableObject {
             case .failure(let error):
                 print(#function, "Unsuccessful response from server : \(error)")
             }
-            
         }
     }
     
-    func searchRestaurants(searchText: String) {
-        
+    func searchRestaurants(for searchTerm: String) -> [Restaurant]{
+        if searchTerm.isEmpty{
+            return restaurants
+        }else{
+            return restaurants.filter{ restaurant in
+                restaurant.name.localizedCaseInsensitiveContains(searchTerm)
+            }
+        }
     }
+    
     
     func getRestaurantDetails(restaurant: Restaurant) {
         print("restauring to be found is \(restaurant.id)")
         let apiURL = "https://api.yelp.com/v3/businesses/\(restaurant.id)"
-        let headers: HTTPHeaders = ["Authorization": "Bearer \(API_KEY)",
-                                   "Content-Type": "application/json"]
+        let headers: HTTPHeaders = ["Authorization": "Bearer \(API_KEY)","Content-Type": "application/json"]
         
         AF.request(apiURL, headers: headers).responseJSON{ response in
             print("response is \(response)")
@@ -103,7 +112,6 @@ class RestaurantViewModel: ObservableObject {
                     restaurant.openingHours = openingHours
                     restaurant.photoUrls = photoUrls
                     restaurant.price = price
-//                    return restaurant
                 
                 
                 print(#function, "restaurants - \(restaurant)")

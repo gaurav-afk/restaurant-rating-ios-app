@@ -26,7 +26,13 @@ struct RestaurantDetailView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 50, height: 50)
-                    
+                        
+                    case .failure:
+                        Text("Error")
+                            .font(.headline)
+                        
+                        
+                        
                     @unknown default:
                         Image(systemName: "broken_image")
                             .onAppear(){

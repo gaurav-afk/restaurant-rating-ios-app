@@ -9,31 +9,29 @@ import SwiftUI
 
 struct RestaurantListView: View {
     @ObservedObject private var restaurantViewModel = RestaurantViewModel()
-    @State private var searchText: String = ""
+    @State var searchText: String = ""
+    
+    var filteredRestaurant: [Restaurant] {
+        print("searching for: \(searchText)")
+        return restaurantViewModel.searchRestaurants(for: searchText)
+    }
     
     var body: some View {
         NavigationStack {
             
-
-            Text("testing")
-            
-
-            List(restaurantViewModel.restaurants) {restaurant in
-//                RestaurantItemView().environmentObject(restaurant)
-                
+            List(filteredRestaurant) { restaurant in
                 NavigationLink {
                     RestaurantDetailView(restaurant: restaurant)
                 } label: {
                     RestaurantItemView(restaurant: restaurant)
                 }
-                
             }
+            .searchable(text: $searchText)
+            .autocorrectionDisabled()
         }
         .onAppear(){
             print("getting from api")
-            restaurantViewModel.getRestaurants()
         }
-        .searchable(text: $searchText, prompt: "Search Restaurant")
     }
 }
 
